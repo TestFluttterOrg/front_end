@@ -13,7 +13,7 @@ class _CoordClient implements CoordClient {
     this._dio, {
     this.baseUrl,
   }) {
-    baseUrl ??= 'http://192.168.1.3/api';
+    baseUrl ??= 'http://192.168.1.3:3001/api';
   }
 
   final Dio _dio;

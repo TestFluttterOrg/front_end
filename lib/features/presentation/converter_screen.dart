@@ -1,9 +1,11 @@
+import 'package:coord_converter/features/presentation/app_dialog.dart';
 import 'package:coord_converter/features/presentation/converter_bloc.dart';
 import 'package:coord_converter/features/presentation/converter_state.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 
 class ConverterScreen extends StatelessWidget {
   const ConverterScreen({super.key});
@@ -29,7 +31,7 @@ class ConverterScreen extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.center,
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              const UIEvents(),
+              const UIEventsWidget(),
               const UIErrorMessage(),
               SizedBox(height: 10.h),
               const TextWidget(text: "LONGITUDE"),
@@ -67,10 +69,12 @@ class ConverterScreen extends StatelessWidget {
 class TextFieldWidget extends StatelessWidget {
   final TextEditingController controller;
   final Function(String) onTextChanged;
+  final bool allowFormatter;
 
   const TextFieldWidget({
     required this.controller,
     required this.onTextChanged,
+    this.allowFormatter = true,
     super.key,
   });
 
@@ -82,9 +86,11 @@ class TextFieldWidget extends StatelessWidget {
         onChanged: onTextChanged,
         controller: controller,
         keyboardType: const TextInputType.numberWithOptions(decimal: true),
-        inputFormatters: [
-          FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d*')),
-        ],
+        inputFormatters: !allowFormatter
+            ? []
+            : [
+                FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d*')),
+              ],
         decoration: const InputDecoration(
           labelText: "",
           border: OutlineInputBorder(),
@@ -117,15 +123,17 @@ class Button extends StatelessWidget {
 class TextWidget extends StatelessWidget {
   final String text;
   final TextStyle? style;
+
   const TextWidget({required this.text, this.style, super.key});
 
   @override
   Widget build(BuildContext context) {
     return Text(
       text,
-      style: style ?? TextStyle(
-        fontSize: 11.h,
-      ),
+      style: style ??
+          TextStyle(
+            fontSize: 11.h,
+          ),
     );
   }
 }
@@ -151,15 +159,30 @@ class UIErrorMessage extends StatelessWidget {
   }
 }
 
-class UIEvents extends StatelessWidget {
-  const UIEvents({super.key});
+class UIEventsWidget extends StatelessWidget {
+  const UIEventsWidget({super.key});
 
   @override
   Widget build(BuildContext context) {
     return BlocListener<ConverterCubit, ConverterState>(
       child: const SizedBox(),
       listenWhen: (prev, current) => prev.uiEvents != current.uiEvents,
-      listener: (context, state) {},
+      listener: (context, state) {
+        final event = state.uiEvents;
+        switch (event) {
+          case UIEvents.showToastMessage:
+            Fluttertoast.showToast(msg: state.message);
+            break;
+          case UIEvents.showLoading:
+            AppDialog.loading(context);
+            break;
+          case UIEvents.hideLoading:
+            AppDialog.hide(context);
+            break;
+          default:
+            break;
+        }
+      },
     );
   }
 }
@@ -167,8 +190,14 @@ class UIEvents extends StatelessWidget {
 class ConvertedResults extends StatelessWidget {
   const ConvertedResults({super.key});
 
+  void onSave(BuildContext context) {
+    final bloc = context.read<ConverterCubit>();
+    bloc.saveCoordinates();
+  }
+
   @override
   Widget build(BuildContext context) {
+    final bloc = context.read<ConverterCubit>();
     return BlocBuilder<ConverterCubit, ConverterState>(
       buildWhen: (prev, current) =>
           prev.showResult != current.showResult ||
@@ -192,10 +221,36 @@ class ConvertedResults extends StatelessWidget {
             ),
             SizedBox(height: 5.h),
             ResultItem(label: "LONGITUDE:", data: state.longResult),
-            SizedBox(height: 5.h),
+            SizedBox(height: 15.h),
             ResultItem(label: "LATITUDE:", data: state.latResult),
-            SizedBox(height: 5.h),
-            Button(text: "SAVE", onPress: () {}),
+            SizedBox(height: 10.h),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                TextWidget(
+                  text: "NOTES",
+                  style: TextStyle(
+                    fontSize: 13.h,
+                    fontWeight: FontWeight.w400,
+                  ),
+                ),
+                SizedBox(width: 20.w),
+                Expanded(
+                  child: TextFieldWidget(
+                    allowFormatter: false,
+                    controller: bloc.notesController,
+                    onTextChanged: (val) {},
+                  ),
+                ),
+              ],
+            ),
+            SizedBox(height: 10.h),
+            Button(
+              text: "SAVE",
+              onPress: () {
+                onSave(context);
+              },
+            ),
           ],
         );
       },

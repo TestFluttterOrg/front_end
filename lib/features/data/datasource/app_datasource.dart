@@ -48,8 +48,8 @@ class AppDataSourceImpl extends AppDataSource {
   @override
   Future<ResultModel> saveCoordinates(CoordPayloadEntity payload) async {
     try {
-      final res = await client.saveCoordinates(payload);
-      if (res.response.statusCode == 200) {
+      final res = await client.saveCoordinates(payload.toJson());
+      if (res.response.statusCode == 201) {
         return const ResultModel(
           isSuccess: true,
           message: "Coordinate successfully saved!"
