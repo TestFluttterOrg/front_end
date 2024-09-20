@@ -40,7 +40,7 @@ class ConverterCubit extends Cubit<ConverterState> {
         );
       }
       else {
-        emit(state.copyWith(showResult: false));
+        emit(state.copyWith(showResult: false, uiErrorMessage: data.message));
       }
     }
   }

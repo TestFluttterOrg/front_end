@@ -33,7 +33,7 @@ class AppDataSourceImpl extends AppDataSource {
     } catch (e) {
       return const ResultModel(
         isSuccess: false,
-        message: "Something went wrong",
+        message: "Failed to convert coordinates",
       );
     }
   }
