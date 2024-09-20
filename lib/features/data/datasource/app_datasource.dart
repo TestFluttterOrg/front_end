@@ -66,10 +66,14 @@ class AppDataSourceImpl extends AppDataSource {
       // }
       var ip = Constants.HOST_IP;
       var url = "http://$ip:3001/api/coordinates/save";
-      var response = await http.post(
-        Uri.parse(url),
-        body: payload.toJson(),
-      );
+      var response = await http
+          .post(
+            Uri.parse(url),
+            body: payload.toJson(),
+          )
+          .timeout(
+            const Duration(seconds: 30),
+          );
       if (response.statusCode == 201) {
         return const ResultModel(
           isSuccess: true,

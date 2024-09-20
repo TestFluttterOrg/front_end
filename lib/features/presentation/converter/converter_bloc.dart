@@ -29,9 +29,6 @@ class ConverterCubit extends Cubit<ConverterState> {
       emit(state.copyWith(uiErrorMessage: "Longitude field is empty"));
     } else if (latitude.isEmpty) {
       emit(state.copyWith(uiErrorMessage: "Latitude field is empty"));
-    } else if (Constants.HOST_IP.trim() == "" ||
-        Constants.HOST_IP.trim() == " ") {
-      emit(state.copyWith(uiErrorMessage: "Please setup the HOST IP"));
     } else {
       emit(state.copyWith(uiErrorMessage: ""));
       final data = await repository.convertCoordinates(
@@ -57,7 +54,12 @@ class ConverterCubit extends Cubit<ConverterState> {
     final latitude = latTextController.text;
     final notes = notesController.text;
 
-    emit(state.copyWith(uiEvents: UIEvents.hideLoading));
+    if (Constants.HOST_IP.trim() == "" || Constants.HOST_IP.trim() == " ") {
+      emit(state.copyWith(uiErrorMessage: "Please setup the HOST IP"));
+      return;
+    }
+
+    emit(state.copyWith(uiEvents: UIEvents.hideLoading, uiErrorMessage: ""));
     emit(state.copyWith(uiEvents: UIEvents.showLoading));
     final result = await repository.saveCoordinates(
       longitude: longitude,
