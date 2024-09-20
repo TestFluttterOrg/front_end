@@ -1,4 +1,3 @@
-import 'package:coord_converter/core/routes/routes.dart';
 import 'package:coord_converter/features/presentation/app_dialog.dart';
 import 'package:coord_converter/features/presentation/converter/converter_bloc.dart';
 import 'package:coord_converter/features/presentation/converter/converter_state.dart';
@@ -10,15 +9,35 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:go_router/go_router.dart';
 
-class ConverterScreen extends StatelessWidget {
+class ConverterScreen extends StatefulWidget {
   const ConverterScreen({super.key});
 
   static String routeName = "/converterScreen";
 
   @override
+  State<ConverterScreen> createState() => _ConverterScreenState();
+}
+
+class _ConverterScreenState extends State<ConverterScreen> {
+  double statusBarHeight = 0;
+
+  @override
+  void initState() {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final mq = MediaQuery.of(context);
+      setState(() {
+        statusBarHeight = mq.padding.top;
+      });
+    });
+    super.initState();
+  }
+
+  @override
   Widget build(BuildContext context) {
+    final titleBarHeight = AppBar().preferredSize.height;
     final width = MediaQuery.of(context).size.width;
     final height = MediaQuery.of(context).size.height;
+    final containerHeight = height - (titleBarHeight + statusBarHeight);
     final bloc = context.read<ConverterCubit>();
     final longController = bloc.longTextController;
     final latController = bloc.latTextController;
@@ -38,60 +57,67 @@ class ConverterScreen extends StatelessWidget {
             ),
           ),
         ),
-        body: Stack(
-          children: [
-            Container(
-              padding: EdgeInsets.symmetric(horizontal: 20.w),
-              width: width,
-              height: height,
-              color: Colors.transparent,
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  const UIEventsWidget(),
-                  const UIErrorMessage(),
-                  SizedBox(height: 10.h),
-                  const TextWidget(text: "LONGITUDE"),
-                  TextFieldWidget(
-                    controller: longController,
-                    onTextChanged: (val) {
-                      bloc.hideAndClearUIIndicators();
-                    },
+        body: SingleChildScrollView(
+          physics: const ScrollPhysics(),
+          child: SizedBox(
+            height: containerHeight,
+            width: width,
+            child: Stack(
+              children: [
+                Container(
+                  padding: EdgeInsets.symmetric(horizontal: 20.w),
+                  width: width,
+                  height: containerHeight,
+                  color: Colors.transparent,
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      const UIEventsWidget(),
+                      const UIErrorMessage(),
+                      SizedBox(height: 10.h),
+                      const TextWidget(text: "LONGITUDE"),
+                      TextFieldWidget(
+                        controller: longController,
+                        onTextChanged: (val) {
+                          bloc.hideAndClearUIIndicators();
+                        },
+                      ),
+                      SizedBox(height: 10.h),
+                      const TextWidget(text: "LATITUDE"),
+                      TextFieldWidget(
+                        controller: latController,
+                        onTextChanged: (val) {
+                          bloc.hideAndClearUIIndicators();
+                        },
+                      ),
+                      SizedBox(height: 10.h),
+                      Button(
+                        text: "CONVERT COORDS",
+                        onPress: () {
+                          bloc.convertToDMS();
+                        },
+                      ),
+                      SizedBox(height: 20.h),
+                      const ConvertedResults(),
+                    ],
                   ),
-                  SizedBox(height: 10.h),
-                  const TextWidget(text: "LATITUDE"),
-                  TextFieldWidget(
-                    controller: latController,
-                    onTextChanged: (val) {
-                      bloc.hideAndClearUIIndicators();
-                    },
-                  ),
-                  SizedBox(height: 10.h),
-                  Button(
-                    text: "CONVERT COORDS",
-                    onPress: () {
-                      bloc.convertToDMS();
-                    },
-                  ),
-                  SizedBox(height: 20.h),
-                  const ConvertedResults(),
-                ],
-              ),
-            ),
-            Align(
-              alignment: Alignment.topRight,
-              child: Container(
-                margin: EdgeInsets.only(right: 20.w),
-                child: Button(
-                  text: "SETTINGS",
-                  onPress: () {
-                    context.pushNamed(SettingsScreen.routeName);
-                  },
                 ),
-              ),
+                Align(
+                  alignment: Alignment.topRight,
+                  child: Container(
+                    margin: EdgeInsets.only(right: 20.w),
+                    child: Button(
+                      text: "SETTINGS",
+                      onPress: () {
+                        context.pushNamed(SettingsScreen.routeName);
+                      },
+                    ),
+                  ),
+                ),
+              ],
             ),
-          ],
+          ),
         ),
       ),
     );
@@ -102,11 +128,13 @@ class TextFieldWidget extends StatelessWidget {
   final TextEditingController controller;
   final Function(String) onTextChanged;
   final bool allowFormatter;
+  final bool isKeyboardDecimal;
 
   const TextFieldWidget({
     required this.controller,
     required this.onTextChanged,
     this.allowFormatter = true,
+    this.isKeyboardDecimal = true,
     super.key,
   });
 
@@ -117,7 +145,9 @@ class TextFieldWidget extends StatelessWidget {
       child: TextField(
         onChanged: onTextChanged,
         controller: controller,
-        keyboardType: const TextInputType.numberWithOptions(decimal: true),
+        keyboardType: !isKeyboardDecimal
+            ? null
+            : const TextInputType.numberWithOptions(decimal: true),
         inputFormatters: !allowFormatter
             ? []
             : [
@@ -269,6 +299,7 @@ class ConvertedResults extends StatelessWidget {
                 SizedBox(width: 20.w),
                 Expanded(
                   child: TextFieldWidget(
+                    isKeyboardDecimal: false,
                     allowFormatter: false,
                     controller: bloc.notesController,
                     onTextChanged: (val) {},
