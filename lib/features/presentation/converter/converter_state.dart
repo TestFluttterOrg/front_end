@@ -1,4 +1,4 @@
-import 'package:coord_converter/features/presentation/converter_bloc.dart';
+import 'package:coord_converter/features/presentation/converter/converter_bloc.dart';
 import 'package:equatable/equatable.dart';
 
 class ConverterState extends Equatable {

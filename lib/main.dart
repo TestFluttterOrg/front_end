@@ -1,4 +1,5 @@
-import 'package:coord_converter/features/presentation/converter_bloc.dart';
+import 'package:coord_converter/features/presentation/converter/converter_bloc.dart';
+import 'package:coord_converter/features/presentation/settings/settings_bloc.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -27,6 +28,7 @@ class MyApp extends StatelessWidget {
     return MultiBlocProvider(
       providers: [
         BlocProvider(create: (_) => di.vf<ConverterCubit>()),
+        BlocProvider(create: (_) => di.vf<SettingsCubit>()),
       ],
       child: ScreenUtilInit(
         builder: (context, widget) {

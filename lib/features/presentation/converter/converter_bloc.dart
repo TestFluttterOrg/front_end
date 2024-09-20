@@ -1,5 +1,6 @@
+import 'package:coord_converter/core/constants/constants.dart';
 import 'package:coord_converter/features/domain/repository/app_repository.dart';
-import 'package:coord_converter/features/presentation/converter_state.dart';
+import 'package:coord_converter/features/presentation/converter/converter_state.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -28,6 +29,9 @@ class ConverterCubit extends Cubit<ConverterState> {
       emit(state.copyWith(uiErrorMessage: "Longitude field is empty"));
     } else if (latitude.isEmpty) {
       emit(state.copyWith(uiErrorMessage: "Latitude field is empty"));
+    } else if (Constants.HOST_IP.trim() == "" ||
+        Constants.HOST_IP.trim() == " ") {
+      emit(state.copyWith(uiErrorMessage: "Please setup the HOST IP"));
     } else {
       emit(state.copyWith(uiErrorMessage: ""));
       final data = await repository.convertCoordinates(

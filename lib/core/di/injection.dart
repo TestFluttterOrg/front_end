@@ -3,7 +3,8 @@ import 'package:coord_converter/features/data/api/coord_client.dart';
 import 'package:coord_converter/features/data/datasource/app_datasource.dart';
 import 'package:coord_converter/features/data/repository/app_repository_impl.dart';
 import 'package:coord_converter/features/domain/repository/app_repository.dart';
-import 'package:coord_converter/features/presentation/converter_bloc.dart';
+import 'package:coord_converter/features/presentation/converter/converter_bloc.dart';
+import 'package:coord_converter/features/presentation/settings/settings_bloc.dart';
 import 'package:dio/dio.dart';
 import 'package:get_it/get_it.dart';
 
@@ -40,4 +41,5 @@ Future<void> init() async {
       repository: vf.call(),
     ),
   );
+  vf.registerLazySingleton<SettingsCubit>(() => SettingsCubit());
 }

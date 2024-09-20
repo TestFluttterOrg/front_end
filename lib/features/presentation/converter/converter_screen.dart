@@ -1,11 +1,14 @@
+import 'package:coord_converter/core/routes/routes.dart';
 import 'package:coord_converter/features/presentation/app_dialog.dart';
-import 'package:coord_converter/features/presentation/converter_bloc.dart';
-import 'package:coord_converter/features/presentation/converter_state.dart';
+import 'package:coord_converter/features/presentation/converter/converter_bloc.dart';
+import 'package:coord_converter/features/presentation/converter/converter_state.dart';
+import 'package:coord_converter/features/presentation/settings/settings_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:go_router/go_router.dart';
 
 class ConverterScreen extends StatelessWidget {
   const ConverterScreen({super.key});
@@ -15,6 +18,7 @@ class ConverterScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final width = MediaQuery.of(context).size.width;
+    final height = MediaQuery.of(context).size.height;
     final bloc = context.read<ConverterCubit>();
     final longController = bloc.longTextController;
     final latController = bloc.latTextController;
@@ -23,43 +27,71 @@ class ConverterScreen extends StatelessWidget {
         FocusScope.of(context).requestFocus(FocusNode());
       },
       child: Scaffold(
-        body: Container(
-          padding: EdgeInsets.symmetric(horizontal: 20.w),
-          width: width,
-          color: Colors.transparent,
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              const UIEventsWidget(),
-              const UIErrorMessage(),
-              SizedBox(height: 10.h),
-              const TextWidget(text: "LONGITUDE"),
-              TextFieldWidget(
-                controller: longController,
-                onTextChanged: (val) {
-                  bloc.hideAndClearUIIndicators();
-                },
+        appBar: AppBar(
+          title: Center(
+            child: TextWidget(
+              text: "COORDS CONVERTER",
+              style: TextStyle(
+                fontWeight: FontWeight.bold,
+                fontSize: 16.sp,
               ),
-              SizedBox(height: 10.h),
-              const TextWidget(text: "LATITUDE"),
-              TextFieldWidget(
-                controller: latController,
-                onTextChanged: (val) {
-                  bloc.hideAndClearUIIndicators();
-                },
-              ),
-              SizedBox(height: 10.h),
-              Button(
-                text: "CONVERT COORDS",
-                onPress: () {
-                  bloc.convertToDMS();
-                },
-              ),
-              SizedBox(height: 20.h),
-              const ConvertedResults(),
-            ],
+            ),
           ),
+        ),
+        body: Stack(
+          children: [
+            Container(
+              padding: EdgeInsets.symmetric(horizontal: 20.w),
+              width: width,
+              height: height,
+              color: Colors.transparent,
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  const UIEventsWidget(),
+                  const UIErrorMessage(),
+                  SizedBox(height: 10.h),
+                  const TextWidget(text: "LONGITUDE"),
+                  TextFieldWidget(
+                    controller: longController,
+                    onTextChanged: (val) {
+                      bloc.hideAndClearUIIndicators();
+                    },
+                  ),
+                  SizedBox(height: 10.h),
+                  const TextWidget(text: "LATITUDE"),
+                  TextFieldWidget(
+                    controller: latController,
+                    onTextChanged: (val) {
+                      bloc.hideAndClearUIIndicators();
+                    },
+                  ),
+                  SizedBox(height: 10.h),
+                  Button(
+                    text: "CONVERT COORDS",
+                    onPress: () {
+                      bloc.convertToDMS();
+                    },
+                  ),
+                  SizedBox(height: 20.h),
+                  const ConvertedResults(),
+                ],
+              ),
+            ),
+            Align(
+              alignment: Alignment.topRight,
+              child: Container(
+                margin: EdgeInsets.only(right: 20.w),
+                child: Button(
+                  text: "SETTINGS",
+                  onPress: () {
+                    context.pushNamed(SettingsScreen.routeName);
+                  },
+                ),
+              ),
+            ),
+          ],
         ),
       ),
     );
