@@ -49,7 +49,7 @@ class ConverterScreen extends StatelessWidget {
               ),
               SizedBox(height: 10.h),
               Button(
-                text: "CONVERT",
+                text: "CONVERT COORDS",
                 onPress: () {
                   bloc.convertToDMS();
                 },
