@@ -31,6 +31,7 @@ class MyApp extends StatelessWidget {
         BlocProvider(create: (_) => di.vf<SettingsCubit>()),
       ],
       child: ScreenUtilInit(
+        designSize: const Size(450, 890),
         builder: (context, widget) {
           return MaterialApp.router(
             debugShowCheckedModeBanner: false,
